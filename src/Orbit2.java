@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 class Orbit2 extends Plot implements Runnable{
     static double rMax = 2; // max range of plot
@@ -11,6 +13,7 @@ class Orbit2 extends Plot implements Runnable{
     double a1y;
     double totalEnergy;
     Image savedOffscreenImage;
+    boolean running;
     Orbit2() {
         super("Orbits",-rMax, rMax, 1, -rMax, rMax, 1);
         // initialize variables and start simulation thread
@@ -27,13 +30,29 @@ class Orbit2 extends Plot implements Runnable{
         this.setPointSize(1);
         this.savedOffscreenImage = createImage(this.plotHeight + 1, this.plotWidth + 1);
         this.savedOffscreenImage.getGraphics().drawImage(this.offScreenImage, 0, 0, this);
+        this.running = false;
+        Button startStopButton = new Button("Start");
+        startStopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!running) {
+                    running = true;
+                    startStopButton.setLabel("Stop");
+                } else {
+                    running = false;
+                    startStopButton.setLabel("Start");
+                }
+            }
+        });
+        this.controlPanel.add(startStopButton);
+        this.plotFrame.pack();
         Thread simulationThread = new Thread(this);
         simulationThread.start();
     }
 
     public void run() {
         while (true) {
-            doStep();
+            if (this.running) doStep();
             try {
                 Thread.sleep(10);
             } catch(InterruptedException e) {}
