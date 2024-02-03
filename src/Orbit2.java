@@ -107,7 +107,14 @@ class Orbit2 extends Plot implements Runnable{
 
     public synchronized void clearThePlot() {
        super.clearThePlot();
-       if (savedOffscreenImage != null) this.savedOffscreenImage.getGraphics().drawImage(this.offScreenImage, 0, 0, this);
+       this.setColor(Color.yellow);
+       this.setPointSize(15);
+       super.addPoint(0, 0);
+       this.setPointSize(1);
+       this.setColor(Color.red);
+       if (savedOffscreenImage != null) {
+           this.savedOffscreenImage.getGraphics().drawImage(this.offScreenImage, 0, 0, this);
+       }
     }
 
     public static void main(String[] args) {
