@@ -14,6 +14,7 @@ class Orbit2 extends Plot implements Runnable{
     double totalEnergy;
     Image savedOffscreenImage;
     boolean running;
+    double m1, m2;
     Orbit2() {
         super("Orbits",-rMax, rMax, 1, -rMax, rMax, 1);
         // initialize variables and start simulation thread
@@ -21,12 +22,14 @@ class Orbit2 extends Plot implements Runnable{
         this.x1 = 1;
         this.y1 = 0;
         this.v1x = 0;
-        this.v1y = 0.75*2*Math.PI;
+        this.v1y = 2*Math.PI;
         this.x2 = 1.5;
         this.y2 = 0;
         this.v2x = 0;
         this.v2y = 1*2*Math.PI/Math.sqrt(1.5);
         this.totalEnergy = this.totalE();
+        this.m1 =  0.02;
+        this.m2 = 0.02;
         System.out.print("Energy: ");
         System.out.println(this.totalEnergy);
         a1x = this.ax(1);
@@ -67,28 +70,35 @@ class Orbit2 extends Plot implements Runnable{
 
     private double ax(int n) {
         double G = 4 * Math.PI * Math.PI;
-        double x, y;
+        double x, y, m;
+        int sgn = 1;
         if (n == 1) {
             x = this.x1;
             y = this.y1;
+            m = this.m1;
         } else {
             x = this.x2;
             y = this.y2;
+            m = this.m2;
+            sgn = -1;
         }
-        return -G * x * Math.pow((x * x + y * y), -1.5);
+        return -G * x * Math.pow((x * x + y * y), -1.5) + sgn / m * this.interaction() * (this.x2 - this.x1);
     }
 
     private double ay(int n) {
         double G = 4 * Math.PI * Math.PI;
-        double x, y;
+        double x, y, m;
+        int sgn = 1;
         if (n == 1) {
             x = this.x1;
             y = this.y1;
+            m = this.m1;
         } else {
             x = this.x2;
             y = this.y2;
+            m = this.m2;
         }
-        return -G * y * Math.pow((x * x + y * y), -1.5);
+        return -G * y * Math.pow((x * x + y * y), -1.5) + sgn / m * this.interaction() * (this.y2 - this.y1);
     }
 
     private double totalE() {
@@ -97,7 +107,8 @@ class Orbit2 extends Plot implements Runnable{
         double kinE2 = 0.5 * (this.v2x * this.v2x + this.v2y * this.v2y);
         double potE1 = - G * Math.pow((this.x1 * this.x1 + this.y1 * this.y1), -0.5);
         double potE2 = - G * Math.pow((this.x2 * this.x2 + this.y2 * this.y2), -0.5);
-        return kinE1 + potE1 + kinE2 + potE2;
+        double potE12 = - G * this.m1 * this.m2 * Math.pow(((this.x2 - this.x1)*(this.x2 - this.x1) + (this.y2 - this.y1)*(this.y2 -this.y1)), -0.5);
+        return kinE1 + potE1 + kinE2 + potE2 + potE12;
     }
 
     synchronized void doStep() {
@@ -159,6 +170,10 @@ class Orbit2 extends Plot implements Runnable{
        }
     }
 
+    private double interaction() {
+        double G = 4 * Math.PI;
+        return G * this.m1 * this.m2 * Math.pow(((this.x2 - this.x1)*(this.x2 - this.x1) + (this.y2 - this.y1)*(this.y2 - this.y1)), -1.5);
+    }
     public static void main(String[] args) {
         new Orbit2();
     }
