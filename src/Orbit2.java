@@ -3,7 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 class Orbit2 extends Plot implements Runnable{
-    static double rMax = 2; // max range of plot
+    static double rMax = 6; // max range of plot
     double tolerance;
     double x1, x2;
     double y1, y2;
@@ -18,18 +18,18 @@ class Orbit2 extends Plot implements Runnable{
     Orbit2() {
         super("Orbits",-rMax, rMax, 1, -rMax, rMax, 1);
         // initialize variables and start simulation thread
-        this.tolerance = 0.001;
-        this.x1 = 1;
+        this.tolerance = 0.02;
+        this.x1 = 5;
         this.y1 = 0;
-        this.v1x = 0;
-        this.v1y = 2*Math.PI;
-        this.x2 = 1.5;
+        this.v1x =0;
+        this.v1y = 2*Math.PI/Math.sqrt(5);
+        this.x2 = 5.2;
         this.y2 = 0;
         this.v2x = 0;
-        this.v2y = 1*2*Math.PI/Math.sqrt(1.5);
+        this.v2y = 2*Math.PI/Math.sqrt(5.2);
+        this.m1 =  1e-8;
+        this.m2 = 0.001;
         this.totalEnergy = this.totalE();
-        this.m1 =  0.02;
-        this.m2 = 0.02;
         System.out.print("Energy: ");
         System.out.println(this.totalEnergy);
         a1x = this.ax(1);
@@ -103,10 +103,10 @@ class Orbit2 extends Plot implements Runnable{
 
     private double totalE() {
         double G = 4 * Math.PI * Math.PI;
-        double kinE1 = 0.5 * (this.v1x * this.v1x + this.v1y * this.v1y);
-        double kinE2 = 0.5 * (this.v2x * this.v2x + this.v2y * this.v2y);
-        double potE1 = - G * Math.pow((this.x1 * this.x1 + this.y1 * this.y1), -0.5);
-        double potE2 = - G * Math.pow((this.x2 * this.x2 + this.y2 * this.y2), -0.5);
+        double kinE1 = 0.5 * this.m1 * (this.v1x * this.v1x + this.v1y * this.v1y);
+        double kinE2 = 0.5 * this.m2 * (this.v2x * this.v2x + this.v2y * this.v2y);
+        double potE1 = - G * this.m1 * Math.pow((this.x1 * this.x1 + this.y1 * this.y1), -0.5);
+        double potE2 = - G * this.m2 * Math.pow((this.x2 * this.x2 + this.y2 * this.y2), -0.5);
         double potE12 = - G * this.m1 * this.m2 * Math.pow(((this.x2 - this.x1)*(this.x2 - this.x1) + (this.y2 - this.y1)*(this.y2 -this.y1)), -0.5);
         return kinE1 + potE1 + kinE2 + potE2 + potE12;
     }
@@ -115,8 +115,8 @@ class Orbit2 extends Plot implements Runnable{
         // clean images of planets
         offScreenGraphics.drawImage(savedOffscreenImage, 0, 0, this);
         // execute one step of simulation
-        double dt1 = this.tolerance * (this.x1*this.x1 + this.y1*this.y1);
-        double dt2 = this.tolerance * (this.x2*this.x2 + this.y2*this.y2);
+        double dt1 = this.tolerance * Math.pow((this.a1x*this.a1x + this.a1y*this.a1y), -0.5);
+        double dt2 = this.tolerance * Math.pow((this.a2x*this.a2x + this.a2y*this.a2y), -0.5);
         double dt = Math.min(dt1, dt2);
         this.x1 += this.v1x * dt + 0.5 * this.a1x * dt * dt;
         this.y1 += this.v1y * dt + 0.5 * this.a1y * dt * dt;
@@ -138,8 +138,10 @@ class Orbit2 extends Plot implements Runnable{
         this.v2y += 0.5 * this.a2y * dt;
         this.setColor(Color.green);
         this.addPoint(this.x2, this.y2);
+        this.totalEnergy = this.totalE();
         // save image without the planets
         savedOffscreenImage.getGraphics().drawImage(offScreenImage, 0, 0, this);
+        this.showEnergy();
         this.showPlanets();
     }
 
@@ -158,6 +160,11 @@ class Orbit2 extends Plot implements Runnable{
         repaint();
     }
 
+    private void showEnergy() {
+        offScreenGraphics.setColor(Color.black);
+        offScreenGraphics.drawString("Energy = " + this.totalEnergy,0, 380);
+        offScreenGraphics.setColor(this.pointColor);
+    }
     public synchronized void clearThePlot() {
        super.clearThePlot();
        this.setColor(Color.yellow);
@@ -171,7 +178,7 @@ class Orbit2 extends Plot implements Runnable{
     }
 
     private double interaction() {
-        double G = 4 * Math.PI;
+        double G = 4 * Math.PI * Math.PI;
         return G * this.m1 * this.m2 * Math.pow(((this.x2 - this.x1)*(this.x2 - this.x1) + (this.y2 - this.y1)*(this.y2 - this.y1)), -1.5);
     }
     public static void main(String[] args) {
