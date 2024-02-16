@@ -3,7 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 class Orbit2 extends Plot implements Runnable{
-    static double rMax = 6; // max range of plot
+    static double rMax = 5; // max range of plot
     double tolerance;
     double x1, x2;
     double y1, y2;
@@ -19,16 +19,16 @@ class Orbit2 extends Plot implements Runnable{
         super("Orbits",-rMax, rMax, 1, -rMax, rMax, 1);
         // initialize variables and start simulation thread
         this.tolerance = 0.02;
-        this.x1 = 5;
+        this.x1 = 1;
         this.y1 = 0;
         this.v1x =0;
-        this.v1y = 2*Math.PI/Math.sqrt(5);
-        this.x2 = 5.2;
+        this.v1y = 2*Math.PI/Math.sqrt(1);
+        this.x2 = 1.5;
         this.y2 = 0;
         this.v2x = 0;
-        this.v2y = 2*Math.PI/Math.sqrt(5.2);
-        this.m1 =  1e-8;
-        this.m2 = 0.001;
+        this.v2y = 2*Math.PI/Math.sqrt(1.5);
+        this.m1 = 0.02;
+        this.m2 = 0.02;
         this.totalEnergy = this.totalE();
         System.out.print("Energy: ");
         System.out.println(this.totalEnergy);
@@ -97,6 +97,7 @@ class Orbit2 extends Plot implements Runnable{
             x = this.x2;
             y = this.y2;
             m = this.m2;
+            sgn = -1;
         }
         return -G * y * Math.pow((x * x + y * y), -1.5) + sgn / m * this.interaction() * (this.y2 - this.y1);
     }
@@ -120,22 +121,22 @@ class Orbit2 extends Plot implements Runnable{
         double dt = Math.min(dt1, dt2);
         this.x1 += this.v1x * dt + 0.5 * this.a1x * dt * dt;
         this.y1 += this.v1y * dt + 0.5 * this.a1y * dt * dt;
-        this.v1x += 0.5 * this.a1x * dt;
-        this.v1y += 0.5 * this.a1y * dt;
-        this.a1x = this.ax(1);
-        this.a1y = this.ay(1);
-        this.v1x += 0.5 * this.a1x * dt;
-        this.v1y += 0.5 * this.a1y * dt;
-        this.setColor(Color.red);
-        this.addPoint(this.x1, this.y1);
         this.x2 += this.v2x * dt + 0.5 * this.a2x * dt * dt;
         this.y2 += this.v2y * dt + 0.5 * this.a2y * dt * dt;
+        this.v1x += 0.5 * this.a1x * dt;
+        this.v1y += 0.5 * this.a1y * dt;
         this.v2x += 0.5 * this.a2x * dt;
         this.v2y += 0.5 * this.a2y * dt;
+        this.a1x = this.ax(1);
+        this.a1y = this.ay(1);
         this.a2x = this.ax(2);
         this.a2y = this.ay(2);
+        this.v1x += 0.5 * this.a1x * dt;
+        this.v1y += 0.5 * this.a1y * dt;
         this.v2x += 0.5 * this.a2x * dt;
         this.v2y += 0.5 * this.a2y * dt;
+        this.setColor(Color.red);
+        this.addPoint(this.x1, this.y1);
         this.setColor(Color.green);
         this.addPoint(this.x2, this.y2);
         this.totalEnergy = this.totalE();
